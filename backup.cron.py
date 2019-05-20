@@ -1,15 +1,24 @@
 #! /usr/bin/python
 from subprocess import call
 from operator import itemgetter, attrgetter
-import glob, os, sys
+import glob, os, smtplib
 
 def main():
-    # sync backup files and logs to s3, die if error
-    if not (sync_s3()):
-       sys.exit(1)
+    #no message to email by default
+    notify=""
 
-    #keep X number of backups and logs
-    prune_old_backups(12)
+    notify+="[Testing ... ConsistencyCheck errors from eXist will go here]\n"
+ 
+    try: 
+        sync_s3()
+    except:
+        notify+="S3 sync failed\n"
+    else:
+        prune_old_backups(5)
+
+    #send email if there's anything to notify
+    if (notify):
+        email_notify(notify)
 
 def sort_files_by_last_modified(files):
     """ Given a list of files, return them sorted by the last
@@ -38,7 +47,7 @@ def sync_s3():
     return not(bool(copybackups or copyresources))
 
 
-# keep X number of backup and log files, delete the rest
+# keep X number of backup and log files, delete others
 def prune_old_backups(keep):
     # Find all backup files matching the path.
     file_paths = glob.glob('/home/existdb/exist-backup/full*.zip')
@@ -56,6 +65,17 @@ def prune_old_backups(keep):
     sorted_files = sort_files_by_last_modified(file_paths)
 
     delete_oldest_files(sorted_files, keep)
+
+#email message containing notification text
+def email_notify(notification):
+    sender = 'dave@scheuneman.com'
+    receivers = ['dave@scheuneman.com','dominic.latham@84000.co']
+
+    message = "From: dave@scheuneman.com\nTo: dave@scheuneman.com,dominic.latham@84000.co\nSubject: 84000 collab-server cron message\n"
+    message += "backup.cron.py on collaboration generated this message:\n"+notification+"\n"
+
+    smtpObj = smtplib.SMTP('localhost')
+    smtpObj.sendmail(sender, receivers, message)
 
 #Run Me
 main()
