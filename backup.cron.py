@@ -2,12 +2,13 @@
 from subprocess import call
 from operator import itemgetter, attrgetter
 import glob, os, smtplib
+notify=""
 
 def main():
     #no message to email by default
-    notify=""
+    global notify
 
-    notify+="[Testing ... ConsistencyCheck errors from eXist will go here]\n"
+    check_backup_log()
  
     try: 
         sync_s3()
@@ -40,8 +41,8 @@ def delete_oldest_files(sorted_files, keep = 3):
 
 # sync backups to s3
 def sync_s3():
-    copybackups = call (['aws', 's3', 'sync', '/home/existdb/exist-backup', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-backup'])
-    copyresources = call (['aws', 's3', 'sync', '/var/www/html/translator-resources', 's3://us-east-1-84000.co-backup/84000-translate.org/translator-resources'])
+    copybackups = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-backup', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-backup'])
+    copyresources = call (['/usr/bin/aws', 's3', 'sync', '/var/www/html/translator-resources', 's3://us-east-1-84000.co-backup/84000-translate.org/translator-resources'])
     """non-zero above means there was an error"""
     """return true if success, false if error"""
     return not(bool(copybackups or copyresources))
@@ -65,6 +66,20 @@ def prune_old_backups(keep):
     sorted_files = sort_files_by_last_modified(file_paths)
 
     delete_oldest_files(sorted_files, keep)
+
+def check_backup_log():
+    global notify
+    # Find and sort log files
+    file_paths = glob.glob('/home/existdb/exist-backup/report*.log')
+    sorted_files = sort_files_by_last_modified(file_paths)
+
+    #check the newest log for errors
+    newest=(len(sorted_files))-1
+    logname = sorted_files[newest][0]
+    greplog = not (call (['grep', '-i', 'fail', logname]))
+    if greplog:
+        notify += "There is an error reported in log file "+logname+"\n"   
+
 
 #email message containing notification text
 def email_notify(notification):
