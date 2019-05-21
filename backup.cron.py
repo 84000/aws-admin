@@ -2,10 +2,10 @@
 from subprocess import call
 from operator import itemgetter, attrgetter
 import glob, os, smtplib
+#set empty global string to contain error messages
 notify=""
 
 def main():
-    #no message to email by default
     global notify
 
     check_backup_log()
