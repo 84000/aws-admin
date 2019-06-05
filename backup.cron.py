@@ -1,6 +1,7 @@
 #! /usr/bin/python
 from subprocess import call
 from operator import itemgetter, attrgetter
+from socket import gethostname
 import glob, os, smtplib
 
 #set empty global string to contain error messages
@@ -43,9 +44,13 @@ def delete_oldest_files(sorted_files, keep = 3):
 
 # sync backups to s3
 def sync_s3():
-    copybackups = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-backup', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-backup'])
-    copyresources = call (['/usr/bin/aws', 's3', 'sync', '/var/www/html/translator-resources', 's3://us-east-1-84000.co-backup/84000-translate.org/translator-resources'])
-    copyxlogs = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-xml-logs', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-xml-logs'])
+    server = gethostname()
+    if server == '84000-collaboration':
+        copybackups = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-backup', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-backup'])
+        copyresources = call (['/usr/bin/aws', 's3', 'sync', '/var/www/html/translator-resources', 's3://us-east-1-84000.co-backup/84000-translate.org/translator-resources'])
+        copyxlogs = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-xml-logs', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-xml-logs'])
+    elif server == '84000-distribution':
+        copybackups = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-backup', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-backup'])
     """non-zero above means there was an error"""
     """return true if success, false if error"""
     return not(bool(copybackups or copyresources or copyxlogs))
