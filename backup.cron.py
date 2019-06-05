@@ -50,7 +50,7 @@ def sync_s3():
         copyresources = call (['/usr/bin/aws', 's3', 'sync', '/var/www/html/translator-resources', 's3://us-east-1-84000.co-backup/84000-translate.org/translator-resources'])
         copyxlogs = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-xml-logs', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-xml-logs'])
     elif server == '84000-distribution':
-        copybackups = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-backup', 's3://us-east-1-84000.co-backup/84000-translate.org/eXist-backup'])
+        copybackups = call (['/usr/bin/aws', 's3', 'sync', '/home/existdb/exist-backup', 's3://us-east-1-84000.co-backup/84000.co/eXist-backup'])
     """non-zero above means there was an error"""
     """return true if success, false if error"""
     return not(bool(copybackups or copyresources or copyxlogs))
