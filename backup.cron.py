@@ -96,10 +96,10 @@ def check_backup_log():
 #email message containing notification text
 def email_notify(notification):
     global servername
-    sender = 'dave@scheuneman.com'
+    sender = 'tech@84000.co'
     receivers = ['dave@scheuneman.com','dominic.latham@84000.co']
 
-    message = "From: dave@scheuneman.com\nTo: dave@scheuneman.com,dominic.latham@84000.co\nSubject: "+servername+" cron message\n"
+    message = "From: "+sender+"\nTo: dave@scheuneman.com,dominic.latham@84000.co\nSubject: "+servername+" cron message\n"
     message += "backup.cron.py on "+servername+" generated this message:\n"+notification+"\n"
 
     smtpObj = smtplib.SMTP('localhost')
