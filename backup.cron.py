@@ -11,6 +11,8 @@ notify=""
 
 def main():
     global notify
+    #To enable precautionary daily eXist restart, set reXist=True
+    reXist=False
 
     check_backup_log()
 
@@ -21,8 +23,8 @@ def main():
     else:
         prune_old_backups(3)
     
-    #To enable precautionary daily reboot, uncomment the following line
-    #eXist_restart()
+    if (reXist):
+        eXist_restart()
 
     #send email if there's anything to notify
     if (notify):
