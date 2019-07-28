@@ -20,6 +20,9 @@ def main():
         notify+="S3 sync failed\n"
     else:
         prune_old_backups(3)
+    
+    #To enable precautionary daily reboot, uncomment the following line
+    #eXist_restart()
 
     #send email if there's anything to notify
     if (notify):
@@ -104,6 +107,14 @@ def email_notify(notification):
 
     smtpObj = smtplib.SMTP('localhost')
     smtpObj.sendmail(sender, receivers, message)
+
+#Restart eXist
+def eXist_restart():
+    global notify
+    call (['/usr/bin/sudo', '/etc/init.d/eXist-db', 'restart'])
+    notify += "\nNote: this script automatically restarted eXist.\n"
+
+
 
 #Run Me
 main()
